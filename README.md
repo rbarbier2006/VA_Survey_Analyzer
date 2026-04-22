@@ -46,8 +46,9 @@ streamlit run app.py
 - Supports numeric categories (`1`, `2`, `3`, ...).
 - Supports common text values for:
   - Question 1 (`Excellent` ... `Poor`)
-  - Question 2 (`Much better now ...` to `Much worse now ...`)
+  - Question 2 (`Much better now ...` to `Much worse now ...`, including `one year` and `8 weeks` wording)
   - Questions `13-19` (`Yes` / `No`)
   - Questions `20-36` common RAND/SF-36 phrase labels (including truncated variants like `Some of t`, `None of th`)
+  - Questions `33-36` accept both `Definitely true/false` style labels and frequency-style labels seen in some exports
 
 If your source text differs from those phrases, use numeric category values in the input workbook.

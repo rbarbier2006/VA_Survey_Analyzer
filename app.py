@@ -37,10 +37,14 @@ TEXT_CATEGORY_MAP: dict[int, dict[str, int]] = {
     },
     2: {
         "much better now than one year ago": 1,
+        "much better now than 8 weeks ago": 1,
         "somewhat better now than one year ago": 2,
+        "somewhat better now than 8 weeks ago": 2,
         "about the same": 3,
         "somewhat worse now than one year ago": 4,
+        "somewhat worse now than 8 weeks ago": 4,
         "much worse now than one year ago": 5,
+        "much worse now than 8 weeks ago": 5,
     },
     **{
         q: {"yes": 1, "no": 2}
@@ -96,11 +100,12 @@ TEXT_CATEGORY_ALIASES: dict[int, dict[int, list[str]]] = {
     },
     **{
         q: {
-            1: ["definitely true"],
-            2: ["mostly true"],
-            3: ["dont know", "don't know", "not sure"],
-            4: ["mostly false"],
-            5: ["definitely false"],
+            # Some exports for Q33-36 use frequency labels instead of true/false labels.
+            1: ["definitely true", "all of the time", "all of t", "all of th"],
+            2: ["mostly true", "most of the time", "most of t", "most of th"],
+            3: ["dont know", "don't know", "not sure", "a good bit of the time", "good bit", "good b", "some of the time", "some of t", "some of th"],
+            4: ["mostly false", "a little of the time", "a little bit of the time", "little of t", "little bit"],
+            5: ["definitely false", "none of the time", "none of t", "none of th"],
         }
         for q in [33, 34, 35, 36]
     },
