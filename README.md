@@ -1,4 +1,4 @@
-# Survey Analyzer
+# VA Survey Analyzer
 
 Streamlit web app that scores uploaded `.xlsx` survey files and returns a scored copy with additional columns appended on the right.
 

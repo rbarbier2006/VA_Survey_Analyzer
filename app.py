@@ -6,7 +6,7 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="Survey Analyzer", layout="wide")
+st.set_page_config(page_title="VA Survey Analyzer", layout="wide")
 
 
 # -----------------------------
@@ -423,7 +423,7 @@ def process_psqi_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 # -----------------------------
 # UI
 # -----------------------------
-st.title("Survey Analyzer")
+st.title("VA Survey Analyzer")
 st.write("Upload an Excel file, choose the survey type, and download a scored copy with appended score columns.")
 
 survey_type = st.selectbox(
