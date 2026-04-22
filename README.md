@@ -1,11 +1,11 @@
-# VA Survey Analyzer
+# Survey Analyzer
 
-Simple Streamlit web app that:
-- takes an input `.xlsx` survey file,
-- copies the original columns,
-- appends recoded question scores,
-- appends scale averages,
-- lets you download the scored `.xlsx`.
+Streamlit web app that scores uploaded `.xlsx` survey files and returns a scored copy with additional columns appended on the right.
+
+## Supported surveys
+
+1. **RAND Health Survey Questionnaire (modified for wheelchair users)**
+2. **Pittsburgh Sleep Quality Index (PSQI)**
 
 ## Run locally
 
@@ -18,37 +18,35 @@ streamlit run app.py
 
 ## Input format
 
-- Header row should start each question column with the question number, e.g.:
-  - `1. In general, would you say...`
-  - `13. Cut down the amount of time...`
-- The app extracts the leading number from each column name.
+- The first row is treated as headers.
+- Each question column should begin with the question identifier:
+  - RAND: `1.`, `13.`, `20.`, etc.
+  - PSQI: `1.`, `2.`, `5a.`, `5b.`, ..., `5j.`, `6.`, `7.`, `8.`, `9.`
 
-## Scoring behavior implemented
+## RAND scoring behavior
 
-- Table 1 recoding rules implemented for questions used by these scales.
-- Questions `3-12` are intentionally skipped for now.
-- Scale averages implemented from Table 2 except **Physical functioning** (because it depends on `3-12`).
+- Applies existing recoding + scale averages.
+- Questions `3-12` are intentionally skipped.
 
-## Output columns appended
+## PSQI scoring behavior
 
-- `recoded_q{N}` for each processed question.
-- Scale columns:
-  - `role_limitations_physical_health`
-  - `role_limitations_emotional_problems`
-  - `energy_fatigue`
-  - `emotional_well_being`
-  - `social_functioning`
-  - `pain`
-  - `general_health`
+- Uses only self-rated items (`1-9`, including `5a-5j`) for scoring.
+- Bed partner/roommate items (`10`, `10a-10e`) are ignored.
+- Appends these output columns:
+  - `psqi_component_1_subjective_sleep_quality`
+  - `psqi_component_2_sleep_latency`
+  - `psqi_component_3_sleep_duration`
+  - `psqi_component_4_habitual_sleep_efficiency`
+  - `psqi_component_5_sleep_disturbances`
+  - `psqi_component_6_sleep_medication`
+  - `psqi_component_7_daytime_dysfunction`
+  - `psqi_global_score`
+  - `psqi_poor_sleep_flag_gt5`
 
-## Response parsing
+### PSQI parsing notes
 
-- Supports numeric categories (`1`, `2`, `3`, ...).
-- Supports common text values for:
-  - Question 1 (`Excellent` ... `Poor`)
-  - Question 2 (`Much better now ...` to `Much worse now ...`, including `one year` and `8 weeks` wording)
-  - Questions `13-19` (`Yes` / `No`)
-  - Questions `20-36` common RAND/SF-36 phrase labels (including truncated variants like `Some of t`, `None of th`)
-  - Questions `33-36` accept both `Definitely true/false` style labels and frequency-style labels seen in some exports
+- Question 2 accepts values like `20`, `20 min`, `20 minutes` (text after number is ignored).
+- Question 4 accepts values like `9`, `9 hrs`, `6.5`.
+- Questions 1 and 3 accept common time styles like `2230`, `07:30`, `11:00 PM`.
+- For item `5j`, missing value is treated as `0` per your rule.
 
-If your source text differs from those phrases, use numeric category values in the input workbook.
