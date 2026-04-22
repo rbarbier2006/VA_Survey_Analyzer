@@ -46,17 +46,31 @@ def parse_first_float(value: Any) -> float | None:
     return float(match.group(0))
 
 
-def parse_time_to_hours(value: Any) -> float | None:
-    """Return hour-of-day in [0,24), supporting 2230, 07:30, 730, 11:00 PM, etc."""
+def parse_time_to_hours(value: Any, assume_pm_for_plain_hour: bool = False) -> float | None:
+    """Return hour-of-day in [0,24), supporting 2230, 07:30, 730, 11:00 PM, etc.
+
+    If `assume_pm_for_plain_hour=True`, plain hour-only entries in 1..11 (e.g., '11')
+    are interpreted as evening times (23:00). This is useful for PSQI bedtime values.
+    """
     if pd.isna(value):
         return None
 
     if isinstance(value, (int, float)):
-        raw = str(int(value)).zfill(4)
-        hour = int(raw[-4:-2])
-        minute = int(raw[-2:])
-        if 0 <= hour <= 23 and 0 <= minute <= 59:
-            return hour + minute / 60.0
+        numeric = float(value)
+        if numeric.is_integer():
+            whole = int(numeric)
+            # If user entered just an hour like 11, interpret as 11:00 (or 23:00 for bedtime heuristic).
+            if 0 <= whole <= 23:
+                hour = whole
+                if assume_pm_for_plain_hour and 1 <= hour <= 11:
+                    hour += 12
+                return float(hour)
+
+            raw = str(whole).zfill(4)
+            hour = int(raw[-4:-2])
+            minute = int(raw[-2:])
+            if 0 <= hour <= 23 and 0 <= minute <= 59:
+                return hour + minute / 60.0
 
     text = str(value).strip().lower()
 
@@ -71,6 +85,8 @@ def parse_time_to_hours(value: Any) -> float | None:
     if match:
         h = int(match.group(1))
         m = int(match.group(2) or 0)
+        if m == 0 and assume_pm_for_plain_hour and 1 <= h <= 11 and ":" not in text:
+            h += 12
         if 0 <= h <= 23 and 0 <= m <= 59:
             return h + m / 60.0
 
@@ -343,7 +359,11 @@ def process_psqi_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     q4_hours = df[col_q4].apply(parse_first_float) if col_q4 else pd.Series(pd.NA, index=df.index)
     q4_score = q4_hours.apply(recode_q4_hours)
 
-    bedtime_hours = df[col_q1].apply(parse_time_to_hours) if col_q1 else pd.Series(pd.NA, index=df.index)
+    bedtime_hours = (
+        df[col_q1].apply(lambda v: parse_time_to_hours(v, assume_pm_for_plain_hour=True))
+        if col_q1
+        else pd.Series(pd.NA, index=df.index)
+    )
     wake_hours = df[col_q3].apply(parse_time_to_hours) if col_q3 else pd.Series(pd.NA, index=df.index)
     hours_in_bed = pd.Series(
         [time_in_bed_hours(b, w) for b, w in zip(bedtime_hours, wake_hours)],
