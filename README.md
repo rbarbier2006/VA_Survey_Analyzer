@@ -48,5 +48,6 @@ streamlit run app.py
   - Question 1 (`Excellent` ... `Poor`)
   - Question 2 (`Much better now ...` to `Much worse now ...`)
   - Questions `13-19` (`Yes` / `No`)
+  - Questions `20-36` common RAND/SF-36 phrase labels (including truncated variants like `Some of t`, `None of th`)
 
 If your source text differs from those phrases, use numeric category values in the input workbook.

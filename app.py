@@ -48,6 +48,64 @@ TEXT_CATEGORY_MAP: dict[int, dict[str, int]] = {
     },
 }
 
+# Phrase aliases help parse truncated/variant Excel labels (e.g., "Some of t", "None of th").
+# Keys are category numbers and values are acceptable phrase fragments.
+TEXT_CATEGORY_ALIASES: dict[int, dict[int, list[str]]] = {
+    20: {
+        1: ["not at all"],
+        2: ["slightly"],
+        3: ["moderately"],
+        4: ["quite a bit"],
+        5: ["extremely"],
+    },
+    21: {
+        1: ["none"],
+        2: ["very mild"],
+        3: ["mild"],
+        4: ["moderate"],
+        5: ["severe"],
+        6: ["very severe"],
+    },
+    22: {
+        1: ["not at all"],
+        2: ["a little bit", "little bit"],
+        3: ["moderately", "moderate"],
+        4: ["quite a bit"],
+        5: ["extremely"],
+    },
+    **{
+        q: {
+            1: ["all of the time", "all of t"],
+            2: ["most of the time", "most of t"],
+            3: ["a good bit of the time", "good bit", "good b"],
+            4: ["some of the time", "some of t"],
+            5: ["a little bit of the time", "a little bit", "little bit"],
+            6: ["none of the time", "none of t", "none of th"],
+        }
+        for q in [23, 24, 25, 26, 27, 28, 29, 30, 31]
+    },
+    **{
+        q: {
+            1: ["all of the time", "all of t"],
+            2: ["most of the time", "most of t"],
+            3: ["some of the time", "some of t"],
+            4: ["a little of the time", "little of t", "a little bit"],
+            5: ["none of the time", "none of t", "none of th"],
+        }
+        for q in [32]
+    },
+    **{
+        q: {
+            1: ["definitely true"],
+            2: ["mostly true"],
+            3: ["dont know", "don't know", "not sure"],
+            4: ["mostly false"],
+            5: ["definitely false"],
+        }
+        for q in [33, 34, 35, 36]
+    },
+}
+
 # Scales from Table 2 (excluding Physical functioning 3-12 per user request)
 SCALES: dict[str, list[int]] = {
     "role_limitations_physical_health": [13, 14, 15, 16],
@@ -87,6 +145,13 @@ def parse_category(question_number: int, value: Any) -> int | None:
     question_map = TEXT_CATEGORY_MAP.get(question_number)
     if question_map:
         return question_map.get(text)
+
+    aliases = TEXT_CATEGORY_ALIASES.get(question_number)
+    if aliases:
+        for category, variants in aliases.items():
+            for variant in variants:
+                if text == variant or text.startswith(variant) or variant in text:
+                    return category
 
     return None
 
