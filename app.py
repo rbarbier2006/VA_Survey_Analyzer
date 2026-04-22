@@ -218,8 +218,34 @@ def parse_psqi_choice(value: Any, mapping: dict[str, int]) -> int | None:
         return int(text)
 
     for label, score in mapping.items():
-        if text == label or text.startswith(label) or label in text:
+        # Accept exact, truncated, and "label with extra suffix" variants.
+        if (
+            text == label
+            or text.startswith(label)
+            or label.startswith(text)
+            or label in text
+        ):
             return score
+
+    # Extra tolerant handling for common typo/truncation patterns in Q9 exports.
+    if "very slight" in text:
+        return 1
+    if "very big" in text:
+        return 3
+    if "somewhat" in text and "problem" in text:
+        return 2
+    if "no problem" in text:
+        return 0
+
+    # Extra tolerant handling for truncated frequency labels.
+    if "not during" in text:
+        return 0
+    if "less than once" in text:
+        return 1
+    if "once or twice" in text:
+        return 2
+    if "three or more" in text:
+        return 3
     return None
 
 

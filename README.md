@@ -48,5 +48,5 @@ streamlit run app.py
 - Question 2 accepts values like `20`, `20 min`, `20 minutes` (text after number is ignored).
 - Question 4 accepts values like `9`, `9 hrs`, `6.5`.
 - Questions 1 and 3 accept common time styles like `2230`, `07:30`, `11:00 PM`.
+- Frequency/problem text matching is tolerant to truncated exports (e.g., `Not during the past mo`) and common minor typos.
 - For item `5j`, missing value is treated as `0` per your rule.
-
